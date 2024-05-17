@@ -21,7 +21,7 @@ android {
             useSupportLibrary = true
         }
 
-        buildConfigField("String", "API_BASE_URL", "\"https://test2.joki-joya.ru/\"")
+        buildConfigField("String", "API_BASE_URL", "\"https://localhost:8080/\"")
     }
 
     buildTypes {
@@ -141,4 +141,7 @@ dependencies {
 
     //Arrow
     implementation(libs.arrow.core)
+
+    //DataStore
+    implementation(libs.datastore)
 }

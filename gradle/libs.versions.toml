@@ -24,6 +24,7 @@ raamcosta = "1.9.55"
 coroutines = "1.7.3"
 material = "1.1.2"
 compose = "1.5.4"
+dataStore = "1.1.1"
 
 [libraries]
 #core
@@ -78,6 +79,8 @@ coil-gif = { group = "io.coil-kt", name = "coil-gif", version.ref = "coil" }
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 #arrow
 arrow-core = { group = "io.arrow-kt", name = "arrow-core", version.ref = "arrowCore" }
+#datastore
+datastore = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "dataStore" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
