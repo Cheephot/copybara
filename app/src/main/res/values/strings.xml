@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Wallet</string>
+
+    <!-- navigation bar -->
+    <string name="main">Главное</string>
+    <string name="goals">Цели</string>
+    <string name="analytics">Аналитика</string>
+    <string name="settings">Настройки</string>
+    <string name="enter_in_application">Войдите в КопиБара</string>
+    <string name="email">Email</string>
+    <string name="password">Пароль</string>
+    <string name="enter">Войти</string>
+    <string name="create_account">Создать аккаунт в КопиБара</string>
+    <string name="your_name">Ваше имя</string>
+    <string name="create_account_and_enter">Создать аккаунт и войти</string>
+    <string name="acquaintance">Давайте знакомиться</string>
+</resources>
