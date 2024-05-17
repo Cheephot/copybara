@@ -5,19 +5,21 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import arrow.core.Either
 import com.ramcosta.composedestinations.spec.Route
+import com.xakaton.wallet.domain.command.CommandDispatcher
+import com.xakaton.wallet.domain.command.operations.auth.RegisterCommand
+import com.xakaton.wallet.domain.query.QueryDispatcher
+import com.xakaton.wallet.domain.query.operations.users.GetUserByIdQuery
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
-import java.io.Serializable
 import javax.inject.Inject
 
 @HiltViewModel
 class ApplicationRootUIViewModel @Inject constructor(
-
+    private val queryDispatcher: QueryDispatcher,
+    private val commandDispatcher: CommandDispatcher
 ) : ViewModel() {
 
     sealed interface NavigationEvent {
@@ -33,6 +35,11 @@ class ApplicationRootUIViewModel @Inject constructor(
     val navigationEvents = _navigationEvents.receiveAsFlow()
 
     init {
+        viewModelScope.launch {
+            queryDispatcher.dispatch(GetUserByIdQuery(""))
+            commandDispatcher.dispatch(RegisterCommand("", "", ""))
+        }
+
         viewModelScope.launch {
 //            combine(
 //                queryDispatcher.dispatch(GetShowOnboardingQuery).take(1),

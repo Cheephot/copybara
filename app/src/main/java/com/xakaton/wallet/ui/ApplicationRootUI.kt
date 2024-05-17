@@ -1,5 +1,6 @@
 package com.xakaton.wallet.ui
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -26,6 +27,7 @@ import com.ramcosta.composedestinations.navigation.dependency
 import com.xakaton.budget.ui.NavGraphs
 import com.xakaton.wallet.ui.nav_graphs.RootNavigator
 
+@SuppressLint("SuspiciousIndentation")
 @OptIn(
     ExperimentalMaterialNavigationApi::class,
     ExperimentalAnimationApi::class,
