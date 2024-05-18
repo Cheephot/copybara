@@ -1,6 +1,13 @@
 package com.xakaton.wallet.ui.destinations.sections
 
 import androidx.annotation.DrawableRes
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Transition
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.updateTransition
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -30,10 +37,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -53,7 +62,7 @@ import com.xakaton.wallet.ui.utils.indicationClickable
 
 @Composable
 @Destination
-@RootNavGraph
+@RootNavGraph(start = true)
 fun SectionsScreen(
     rootNavigator: RootNavigator
 ) {
@@ -143,6 +152,8 @@ private fun SectionsScreen(
     onBottomNavigationItemClick: (BottomNavigationItem) -> Unit,
     content: @Composable (PaddingValues) -> Unit
 ) {
+    var floatingActionButtonState by remember { mutableStateOf(false) }
+
     Box {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
@@ -155,12 +166,25 @@ private fun SectionsScreen(
             content = content
         )
 
+        AnimatedVisibility(
+            visible = floatingActionButtonState,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            AddDebtDialog(floatingActionButtonStateChange = { floatingActionButtonState = it })
+        }
+
         AddTransactionButton(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(WindowInsets.navigationBars.asPaddingValues())
                 .padding(bottom = 12.dp),
-            onClick = {}
+            isOpenTransition = updateTransition(
+                targetState = floatingActionButtonState,
+                label = "rotate_animation"
+            ),
+            floatingActionButtonState = floatingActionButtonState,
+            onClick = { floatingActionButtonState = !floatingActionButtonState }
         )
     }
 }
@@ -192,21 +216,39 @@ private fun RowScope.NavigationBarItem(
 
 @Composable
 private fun AddTransactionButton(
+    isOpenTransition: Transition<Boolean>,
+    floatingActionButtonState: Boolean,
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
+    val degrees by isOpenTransition.animateFloat(label = "Degrees") { targetIsOpen ->
+        when (targetIsOpen) {
+            true -> 135f
+            false -> 0f
+        }
+    }
+
+    val bgColor: Color by animateColorAsState(
+        if (floatingActionButtonState) Color(0xFFF1F1F4) else Color(0xFF262626),
+    )
+
+    val buttonColor: Color by animateColorAsState(
+        if (floatingActionButtonState) Color(0xFF8589AF) else Color.White,
+    )
+
     Box(
         modifier = modifier
             .size(56.dp)
             .clip(shape = CircleShape)
-            .background(color = Color.Black)
+            .background(color = bgColor)
             .indicationClickable { onClick() },
         contentAlignment = Alignment.Center,
     ) {
         Icon(
             painter = painterResource(id = R.drawable.ic_plus),
             contentDescription = null,
-            tint = Color.White
+            tint = buttonColor,
+            modifier = Modifier.rotate(degrees = degrees)
         )
     }
 }
