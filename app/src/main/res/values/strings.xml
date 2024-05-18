@@ -1,7 +1,6 @@
 <resources>
     <string name="app_name">Wallet</string>
 
-    <!-- navigation bar -->
     <string name="main">Главное</string>
     <string name="goals">Цели</string>
     <string name="analytics">Аналитика</string>
@@ -14,4 +13,34 @@
     <string name="your_name">Ваше имя</string>
     <string name="create_account_and_enter">Создать аккаунт и войти</string>
     <string name="acquaintance">Давайте знакомиться</string>
+    <string name="spending">Расход</string>
+    <string name="income">Доход</string>
+    <string name="spendings">Расходы</string>
+    <string name="incomes">Доходы</string>
+    <string name="without_limit">Без лимита</string>
+    <string name="without_goals">Без цели</string>
+    <string name="title_spending">Нет расходов</string>
+    <string name="description_spending">Добавьте ваш первый расход</string>
+    <string name="title_income">Нет доходов</string>
+    <string name="description_income">Добавьте ваш первый доход</string>
+    <string name="set_limit_description">Установите лимит расходов\nдля контроля бюджета</string>
+    <string name="set">Установить</string>
+    <string name="work">Работа</string>
+    <string name="business">Бизнес</string>
+    <string name="freelancing">Фриланс</string>
+    <string name="assets">Активы</string>
+    <string name="gifts">Подарки</string>
+    <string name="real_estate">Недвижимость</string>
+    <string name="scholarship">Стипендия</string>
+    <string name="pension">Пенсия</string>
+    <string name="miscellaneous">Разное</string>
+    <string name="supermarkets">Супермаркеты</string>
+    <string name="restaurants">Рестораны</string>
+    <string name="transport">Транспорт</string>
+    <string name="home">Дом</string>
+    <string name="entertainment">Развлечения</string>
+    <string name="development">Развитие</string>
+    <string name="health_and_beauty">Здоровье и красота</string>
+    <string name="clothes_and_shoes">одежда и обувь</string>
+    <string name="animals">Животные</string>
 </resources>
