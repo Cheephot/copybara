@@ -133,6 +133,7 @@ dependencies {
     implementation(libs.accompanist.navigation.material)
     implementation(libs.accompanist.pager.indicators)
     implementation(libs.accompanist.permissions)
+    implementation(libs.accompanist.pager)
 
     //Coil
     implementation(libs.coil.compose)
