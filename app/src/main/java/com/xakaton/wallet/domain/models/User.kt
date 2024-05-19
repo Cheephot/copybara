@@ -6,12 +6,14 @@ data class User(
     val id: String,
     val name: String,
     val email: String,
+    val budgetId: String
 ) {
     companion object {
         fun UserDto.mapToUser() = User(
             id = id,
             name = name,
-            email = email
+            email = email,
+            budgetId = budgetId
         )
     }
 }

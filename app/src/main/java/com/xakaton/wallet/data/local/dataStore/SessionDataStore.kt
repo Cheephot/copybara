@@ -7,11 +7,12 @@ import com.xakaton.wallet.di.IoDispatcher
 import com.xakaton.wallet.domain.models.SessionData
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import javax.inject.Inject
 
-class SessionDataStore @Inject constructor(
+class SessionDataStore(
     @ApplicationContext private val context: Context,
-    @IoDispatcher private val dispatcher: CoroutineDispatcher,
+    dispatcher: CoroutineDispatcher = Dispatchers.IO,
     moshi: Moshi,
 ) : ApplicationDataStore<SessionData>(
     context = context,

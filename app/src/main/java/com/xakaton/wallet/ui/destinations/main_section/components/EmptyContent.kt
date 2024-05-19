@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.xakaton.wallet.R
-import com.xakaton.wallet.ui.destinations.sections.CategoryType
+import com.xakaton.wallet.domain.models.CategoryType
 
 @Composable
 fun EmptyContent(

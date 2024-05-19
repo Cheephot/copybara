@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.jetbrainsKotlinAndroid)
     alias(libs.plugins.ksp)
     alias(libs.plugins.daggerHilt)
+    alias(libs.plugins.parcelize)
 }
 
 android {
@@ -21,7 +22,7 @@ android {
             useSupportLibrary = true
         }
 
-        buildConfigField("String", "API_BASE_URL", "\"https://localhost:8080/\"")
+        buildConfigField("String", "API_BASE_URL", "\"http://158.160.172.56:8080/\"")
     }
 
     buildTypes {
@@ -145,4 +146,7 @@ dependencies {
 
     //DataStore
     implementation(libs.datastore)
+
+    //Calendar
+    implementation(libs.calendar)
 }

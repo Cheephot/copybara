@@ -22,7 +22,9 @@ class Authenticator @Inject constructor(
         return runBlocking {
             val remoteCommandCallResult = refreshAccessTokenCommandHandler.handle(
                 RefreshAccessTokenCommand(
-                    accessToken = response.request.header("Authorization")
+                    accessToken = response.request
+                        .header("Authorization")
+                        ?.removePrefix("Bearer ")
                 )
             )
 
@@ -32,7 +34,7 @@ class Authenticator @Inject constructor(
 
                 is Either.Right -> {
                     response.request.newBuilder()
-                        .header("Authorization", remoteCommandCallResult.value)
+                        .header("Authorization", "Bearer ${remoteCommandCallResult.value}")
                         .build()
                 }
             }

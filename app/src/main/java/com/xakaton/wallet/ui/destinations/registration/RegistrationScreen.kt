@@ -1,5 +1,6 @@
 package com.xakaton.wallet.ui.destinations.registration
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,6 +31,7 @@ import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.xakaton.wallet.R
 import com.xakaton.wallet.ui.components.DefaultTextButton
 import com.xakaton.wallet.ui.components.DefaultTextField
+import com.xakaton.wallet.ui.components.FullscreenProgressIndicator
 import com.xakaton.wallet.ui.components.PasswordTexField
 import com.xakaton.wallet.ui.nav_graphs.RootNavigator
 import com.xakaton.wallet.ui.utils.RightLeftTransition
@@ -65,6 +67,10 @@ fun RegistrationScreen(
             modifier = Modifier.padding(paddingValues),
             viewModel = viewModel
         )
+    }
+
+    if (viewModel.isRequestInProgress) {
+        FullscreenProgressIndicator()
     }
 }
 
@@ -147,7 +153,8 @@ private fun Content(
                 .padding(bottom = 32.dp),
             textId = R.string.create_account_and_enter,
         ) {
-
+            Log.d("tag", "onRegister()")
+            viewModel.onRegister()
         }
     }
 }

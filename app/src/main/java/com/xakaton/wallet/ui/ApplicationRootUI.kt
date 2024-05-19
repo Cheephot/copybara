@@ -11,11 +11,16 @@ import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.plusAssign
 import com.google.accompanist.navigation.material.BottomSheetNavigator
@@ -24,8 +29,13 @@ import com.google.accompanist.navigation.material.ModalBottomSheetLayout
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.animations.rememberAnimatedNavHostEngine
 import com.ramcosta.composedestinations.navigation.dependency
+import com.ramcosta.composedestinations.navigation.popUpTo
 import com.xakaton.budget.ui.NavGraphs
+import com.xakaton.budget.ui.destinations.LoginScreenDestination
 import com.xakaton.wallet.ui.nav_graphs.RootNavigator
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.withContext
 
 @SuppressLint("SuspiciousIndentation")
 @OptIn(
@@ -35,7 +45,7 @@ import com.xakaton.wallet.ui.nav_graphs.RootNavigator
 )
 @Composable
 fun ApplicationRootUI(
-    viewModel: ApplicationRootUIViewModel = hiltViewModel()
+    viewModel: ApplicationRootUIViewModel = hiltViewModel(),
 ) {
     val navController = rememberNavController()
 
@@ -53,11 +63,11 @@ fun ApplicationRootUI(
     val bottomSheetNavigator = rememberBottomSheetNavigator(sheetState = sheetState)
     navController.navigatorProvider += bottomSheetNavigator
 
-//    if (viewModel.startDestination != null) {
-//        HandleNavigationEvents(
-//            navController = navController,
-//            navigationEvents = viewModel.navigationEvents
-//        )
+    if (viewModel.startDestination != null) {
+        HandleNavigationEvents(
+            navController = navController,
+            navigationEvents = viewModel.navigationEvents
+        )
 
         ModalBottomSheetLayout(
             bottomSheetNavigator = bottomSheetNavigator,
@@ -68,7 +78,7 @@ fun ApplicationRootUI(
         ) {
             DestinationsNavHost(
                 modifier = Modifier.fillMaxSize(),
-                navGraph = NavGraphs.root,//.copy(startRoute = viewModel.startDestination!!),
+                navGraph = NavGraphs.root.copy(startRoute = viewModel.startDestination!!),
                 navController = navController,
                 engine = rememberAnimatedNavHostEngine(),
                 dependenciesContainerBuilder = {
@@ -76,33 +86,33 @@ fun ApplicationRootUI(
                 }
             )
         }
-//    }
+    }
 }
 
-//@Composable
-//private fun HandleNavigationEvents(
-//    navController: NavHostController,
-//    navigationEvents: Flow<ApplicationRootUIViewModel.NavigationEvent>,
-//) {
-//    val lifecycleOwner = LocalLifecycleOwner.current
-//
-//    LaunchedEffect(Unit) {
-//        lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-//            withContext(Dispatchers.Main.immediate) {
-//                navigationEvents.collect {
-//                    navController.navigate(EnterPhoneNumberScreenDestination()) {
-//                        popUpTo(NavGraphs.root)
-//                    }
-//                }
-//            }
-//        }
-//    }
-//}
+@Composable
+private fun HandleNavigationEvents(
+    navController: NavHostController,
+    navigationEvents: Flow<ApplicationRootUIViewModel.NavigationEvent>,
+) {
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    LaunchedEffect(Unit) {
+        lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            withContext(Dispatchers.Main.immediate) {
+                navigationEvents.collect {
+                    navController.navigate(LoginScreenDestination.route) {
+                        popUpTo(NavGraphs.root)
+                    }
+                }
+            }
+        }
+    }
+}
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterialNavigationApi::class)
 @Composable
 fun rememberBottomSheetNavigator(
-    sheetState: ModalBottomSheetState
+    sheetState: ModalBottomSheetState,
 ): BottomSheetNavigator {
     return remember(sheetState) {
         BottomSheetNavigator(sheetState = sheetState)

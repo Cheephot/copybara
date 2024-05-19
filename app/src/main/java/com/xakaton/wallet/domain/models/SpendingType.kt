@@ -15,6 +15,6 @@ enum class SpendingType(@DrawableRes val iconId: Int, @StringRes val textId: Int
     HEALTH_AND_BEAUTY(iconId = R.drawable.ic_health_and_beauty, textId = R.string.health_and_beauty, Color(0xFFFF9090)),
     CLOTHES_AND_SHOES(iconId = R.drawable.ic_clothes_and_shoes, textId = R.string.clothes_and_shoes, Color(0xFF96F4FE)),
     GIFTS(iconId = R.drawable.ic_gifts, textId = R.string.gifts, Color(0xFFFEB4E9)),
-    ANIMALS(iconId = R.drawable.ic_animals, textId = R.string.animals, Color(0xFFDAB991)),
+    PETS(iconId = R.drawable.ic_animals, textId = R.string.animals, Color(0xFFDAB991)),
     MISCELLANEOUS(iconId = R.drawable.ic_miscellaneous, textId = R.string.miscellaneous, Color(0xFF8CEB9B))
 }

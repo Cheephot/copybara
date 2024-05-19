@@ -33,29 +33,73 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.pager.pagerTabIndicatorOffset
 import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.result.NavResult
+import com.ramcosta.composedestinations.result.ResultRecipient
+import com.xakaton.budget.ui.destinations.AddTransactionBottomSheetDestination
+import com.xakaton.budget.ui.destinations.CalendarScreenMainSectionDestination
 import com.xakaton.wallet.R
+import com.xakaton.wallet.domain.models.CategoryType
+import com.xakaton.wallet.ui.destinations.add_transaction.AddTransactionResult
+import com.xakaton.wallet.ui.destinations.calendar.DateSelection
 import com.xakaton.wallet.ui.destinations.main_section.components.IncomeContent
 import com.xakaton.wallet.ui.destinations.main_section.components.SpendingContent
-import com.xakaton.wallet.ui.destinations.sections.CategoryType
 import com.xakaton.wallet.ui.nav_graphs.MainSectionNavGraph
-import com.xakaton.wallet.ui.nav_graphs.RootNavigator
+import com.xakaton.wallet.ui.nav_graphs.SectionsNavigator
+import com.xakaton.wallet.ui.utils.launchSingleTopNavigate
 import kotlinx.coroutines.launch
 
 @Composable
 @Destination
 @MainSectionNavGraph(start = true)
 fun MainSectionScreen(
-    rootNavigator: RootNavigator,
+    sectionsNavigator: SectionsNavigator,
     viewModel: MainSectionViewModel = hiltViewModel(),
+    resultRecipientAddTransaction: ResultRecipient<AddTransactionBottomSheetDestination, AddTransactionResult>,
+    resultRecipientDate: ResultRecipient<CalendarScreenMainSectionDestination, DateSelection>,
 ) {
+    resultRecipientAddTransaction.onNavResult { result ->
+        when (result) {
+            is NavResult.Canceled -> {}
+            is NavResult.Value -> {
+                when {
+                    result.value.incomeType != null -> viewModel.addIncomeTransaction(
+                        sum = result.value.sum.toBigDecimal(),
+                        incomeType = result.value.incomeType!!
+                    )
+
+                    result.value.spendingType != null -> viewModel.addSpendingTransaction(
+                        sum = result.value.sum.toBigDecimal(),
+                        spendingType = result.value.spendingType!!
+                    )
+                }
+            }
+        }
+    }
+
+    resultRecipientDate.onNavResult { result ->
+        when (result) {
+            is NavResult.Canceled -> {}
+            is NavResult.Value -> {
+                viewModel.onStartDateChange(result.value.startDate ?: viewModel.startDate)
+                viewModel.onEndDateChange(result.value.endDate ?: viewModel.endDate)
+            }
+        }
+    }
+
     MainSectionScreen(
-        viewModel = viewModel
+        viewModel = viewModel,
+        navigateToCalendarScreen = { dateSelection: DateSelection ->
+            sectionsNavigator.launchSingleTopNavigate(
+                CalendarScreenMainSectionDestination(dateSelection)
+            )
+        }
     )
 }
 
 @Composable
 private fun MainSectionScreen(
     viewModel: MainSectionViewModel,
+    navigateToCalendarScreen: (DateSelection) -> Unit,
 ) {
     Scaffold(
         modifier = Modifier
@@ -68,7 +112,8 @@ private fun MainSectionScreen(
     ) { paddingValues ->
         MainSectionContent(
             modifier = Modifier.padding(paddingValues),
-            viewModel = viewModel
+            viewModel = viewModel,
+            navigateToCalendarScreen = navigateToCalendarScreen
         )
     }
 }
@@ -93,10 +138,17 @@ private fun TopAppBar(
 private fun MainSectionContent(
     modifier: Modifier = Modifier,
     viewModel: MainSectionViewModel,
+    navigateToCalendarScreen: (DateSelection) -> Unit,
 ) {
-    val spendingTransactions by viewModel.spendingTransactions.collectAsState()
+    val spendingTransactions = viewModel.spendingTransactions.collectAsState().value
+        ?.filter { it.createdAt in viewModel.startDate..viewModel.endDate }
+
+
     val spendingLimit by viewModel.spendingLimit.collectAsState()
-    val incomeTransactions by viewModel.incomeTransactions.collectAsState()
+
+    val incomeTransactions = viewModel.incomeTransactions.collectAsState().value
+        ?.filter { it.createdAt in viewModel.startDate..viewModel.endDate }
+
     val incomeGoals by viewModel.incomeGoals.collectAsState()
 
     val pagerState = rememberPagerState(pageCount = { CategoryType.entries.size })
@@ -114,13 +166,19 @@ private fun MainSectionContent(
                 0 -> {
                     SpendingContent(
                         transactions = spendingTransactions,
-                        limit = spendingLimit
+                        limit = spendingLimit,
+                        navigateToCalendarScreen = navigateToCalendarScreen,
+                        startDate = viewModel.startDate,
+                        endDate = viewModel.endDate
                     )
                 }
 
                 1 -> {
                     IncomeContent(
                         transactions = incomeTransactions,
+                        navigateToCalendarScreen = navigateToCalendarScreen,
+                        startDate = viewModel.startDate,
+                        endDate = viewModel.endDate
                     )
                 }
             }

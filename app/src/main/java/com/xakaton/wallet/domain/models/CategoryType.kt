@@ -1,4 +1,4 @@
-package com.xakaton.wallet.ui.destinations.sections
+package com.xakaton.wallet.domain.models
 
 enum class CategoryType {
     SPENDING,

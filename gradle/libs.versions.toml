@@ -25,6 +25,7 @@ coroutines = "1.7.3"
 material = "1.1.2"
 compose = "1.5.4"
 dataStore = "1.1.1"
+calendar = "2.4.1"
 
 [libraries]
 #core
@@ -82,6 +83,8 @@ coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coi
 arrow-core = { group = "io.arrow-kt", name = "arrow-core", version.ref = "arrowCore" }
 #datastore
 datastore = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "dataStore" }
+#calendar
+calendar = { group = "com.kizitonwose.calendar", name = "compose", version.ref = "calendar" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
@@ -89,4 +92,5 @@ androidLibrary = { id = "com.android.library", version.ref = "agp" }
 jetbrainsKotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 daggerHilt = { id = "com.google.dagger.hilt.android", version.ref = "hiltAndroidGradlePlugin" }
+parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
 

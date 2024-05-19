@@ -29,6 +29,7 @@ import com.xakaton.budget.ui.destinations.RegistrationScreenDestination
 import com.xakaton.wallet.R
 import com.xakaton.wallet.ui.components.DefaultTextButton
 import com.xakaton.wallet.ui.components.DefaultTextField
+import com.xakaton.wallet.ui.components.FullscreenProgressIndicator
 import com.xakaton.wallet.ui.components.PasswordTexField
 import com.xakaton.wallet.ui.nav_graphs.RootNavigator
 import com.xakaton.wallet.ui.utils.launchSingleTopNavigate
@@ -67,6 +68,10 @@ private fun LoginScreen(
             viewModel = viewModel,
             navigateToRegistrationScreen = navigateToRegistrationScreen
         )
+    }
+
+    if (viewModel.isRequestInProgress) {
+        FullscreenProgressIndicator()
     }
 }
 
@@ -130,6 +135,7 @@ private fun Content(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 32.dp),
+            onLogin = viewModel::onLogin,
             navigateToRegistrationScreen = navigateToRegistrationScreen
         )
     }
@@ -138,6 +144,7 @@ private fun Content(
 @Composable
 private fun Buttons(
     modifier: Modifier = Modifier,
+    onLogin: () -> Unit,
     navigateToRegistrationScreen: () -> Unit
 ) {
     Column(
@@ -150,7 +157,7 @@ private fun Buttons(
             bgColor = Color(0xFFDCF42C),
             textColor = Color(0xFF262626)
         ) {
-
+            onLogin()
         }
 
         Spacer(modifier = Modifier.height(12.dp))

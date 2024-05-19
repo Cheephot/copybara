@@ -35,10 +35,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.xakaton.wallet.R
+import com.xakaton.wallet.domain.models.CategoryType
 
 @Composable
 fun AddDebtDialog(
     floatingActionButtonStateChange: (Boolean) -> Unit,
+    navigateToAddTransactionBottomSheet: (categoryType: CategoryType) -> Unit,
 ) {
     Box(
         modifier = Modifier
@@ -68,7 +70,7 @@ fun AddDebtDialog(
                 .background(Color.Transparent)
         ) {
             AddDebtDialogItems(
-
+                navigateToAddTransactionBottomSheet = navigateToAddTransactionBottomSheet
             )
         }
     }
@@ -76,7 +78,7 @@ fun AddDebtDialog(
 
 @Composable
 private fun AddDebtDialogItems(
-
+    navigateToAddTransactionBottomSheet: (categoryType: CategoryType) -> Unit
 ) {
     Row(
         horizontalArrangement = Arrangement.SpaceEvenly,
@@ -85,9 +87,7 @@ private fun AddDebtDialogItems(
     ) {
         AddDebtDialogItem(
             color = Color(0xFFFF9090),
-            onClick = {
-
-            },
+            onClick = { navigateToAddTransactionBottomSheet(CategoryType.SPENDING) },
             text = R.string.spending,
             rotateValue = 0f,
 
@@ -95,9 +95,7 @@ private fun AddDebtDialogItems(
 
         AddDebtDialogItem(
             color = Color(0xFFDCF42C),
-            onClick = {
-
-            },
+            onClick = { navigateToAddTransactionBottomSheet(CategoryType.INCOME) },
             text = R.string.income,
             rotateValue = 180f,
         )

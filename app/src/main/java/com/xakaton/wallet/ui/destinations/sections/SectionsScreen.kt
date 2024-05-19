@@ -3,8 +3,10 @@ package com.xakaton.wallet.ui.destinations.sections
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Transition
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -21,8 +23,12 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.BottomNavigation
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Scaffold
+import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
@@ -42,11 +48,13 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.plusAssign
+import com.google.accompanist.navigation.material.ExperimentalMaterialNavigationApi
+import com.google.accompanist.navigation.material.ModalBottomSheetLayout
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
@@ -55,58 +63,87 @@ import com.ramcosta.composedestinations.navigation.navigate
 import com.ramcosta.composedestinations.navigation.popUpTo
 import com.xakaton.budget.ui.NavGraph
 import com.xakaton.budget.ui.NavGraphs
+import com.xakaton.budget.ui.destinations.AddGoalsBottomSheetDestination
+import com.xakaton.budget.ui.destinations.AddTransactionBottomSheetDestination
 import com.xakaton.wallet.R
+import com.xakaton.wallet.domain.models.CategoryType
 import com.xakaton.wallet.ui.nav_graphs.RootNavigator
 import com.xakaton.wallet.ui.nav_graphs.SectionsNavigator
+import com.xakaton.wallet.ui.rememberBottomSheetNavigator
 import com.xakaton.wallet.ui.utils.indicationClickable
+import com.xakaton.wallet.ui.utils.launchSingleTopNavigate
 
+@OptIn(ExperimentalMaterialApi::class, ExperimentalMaterialNavigationApi::class)
 @Composable
 @Destination
 @RootNavGraph(start = true)
 fun SectionsScreen(
-    rootNavigator: RootNavigator
+    rootNavigator: RootNavigator,
 ) {
     val navController = rememberNavController()
     val currentSection by navController.rememberCurrentSectionNavGraphAsState()
 
+    val sheetState = rememberModalBottomSheetState(
+        initialValue = ModalBottomSheetValue.Hidden,
+        skipHalfExpanded = true,
+        // Значение взято из версии material 1.7.0-alpha03 https://android-review.googlesource.com/c/platform/frameworks/support/+/2852687/6/compose/material/material/src/commonMain/kotlin/androidx/compose/material/ModalBottomSheet.kt#554
+        // Можно будет удалить после обновления material до версии 1.7.0
+        animationSpec = tween(
+            durationMillis = 300,
+            easing = FastOutSlowInEasing,
+        )
+    )
+
+    val bottomSheetNavigator = rememberBottomSheetNavigator(sheetState = sheetState)
+    navController.navigatorProvider += bottomSheetNavigator
+
     var sectionsNavigator by remember { mutableStateOf<SectionsNavigator?>(null) }
 
-    SectionsScreen(
-        selectedBottomNavigationItem = currentSection.bottomNavigationItem,
-        onBottomNavigationItemClick = { bottomNavigationItem ->
-            navController.navigate(direction = bottomNavigationItem.sectionNavGraph) {
-                launchSingleTop = true
-                restoreState = true
+    ModalBottomSheetLayout(
+        bottomSheetNavigator = bottomSheetNavigator,
+        sheetShape = RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp),
+        sheetBackgroundColor = Color.Transparent,
+        sheetElevation = 0.dp,
+        modifier = Modifier
+    ) {
+        SectionsScreen(
+            selectedBottomNavigationItem = currentSection.bottomNavigationItem,
+            onBottomNavigationItemClick = { bottomNavigationItem ->
+                navController.navigate(direction = bottomNavigationItem.sectionNavGraph) {
+                    launchSingleTop = true
+                    restoreState = true
 
-                popUpTo(NavGraphs.sections) {
-                    saveState = true
+                    popUpTo(NavGraphs.sections) {
+                        saveState = true
+                    }
                 }
+            },
+            sectionsNavigator = sectionsNavigator,
+            content = { paddingValues ->
+                DestinationsNavHost(
+                    modifier = Modifier
+                        .padding(paddingValues)
+                        .fillMaxSize()
+                        .consumeWindowInsets(WindowInsets.navigationBars),
+                    navGraph = NavGraphs.sections,
+                    navController = navController,
+                    dependenciesContainerBuilder = {
+                        sectionsNavigator = SectionsNavigator(destinationsNavigator)
+
+                        dependency(rootNavigator)
+                        dependency(sectionsNavigator ?: SectionsNavigator(destinationsNavigator))
+                    }
+                )
             }
-        },
-        content = { paddingValues ->
-            DestinationsNavHost(
-                modifier = Modifier
-                    .padding(paddingValues)
-                    .fillMaxSize()
-                    .consumeWindowInsets(WindowInsets.navigationBars),
-                navGraph = NavGraphs.sections,
-                navController = navController,
-                dependenciesContainerBuilder = {
-                    sectionsNavigator = SectionsNavigator(destinationsNavigator)
-
-                    dependency(rootNavigator)
-                    dependency(sectionsNavigator ?: SectionsNavigator(destinationsNavigator))
-                }
-            )
-        }
-    )
+        )
+    }
 }
 
 @Composable
 private fun NavigationBar(
     modifier: Modifier = Modifier,
     selectedItem: BottomNavigationItem?,
-    onItemClick: (BottomNavigationItem) -> Unit
+    onItemClick: (BottomNavigationItem) -> Unit,
 ) {
     BottomNavigation(
         modifier = modifier
@@ -150,7 +187,8 @@ private fun NavigationBar(
 private fun SectionsScreen(
     selectedBottomNavigationItem: BottomNavigationItem?,
     onBottomNavigationItemClick: (BottomNavigationItem) -> Unit,
-    content: @Composable (PaddingValues) -> Unit
+    sectionsNavigator: SectionsNavigator?,
+    content: @Composable (PaddingValues) -> Unit,
 ) {
     var floatingActionButtonState by remember { mutableStateOf(false) }
 
@@ -171,7 +209,14 @@ private fun SectionsScreen(
             enter = fadeIn(),
             exit = fadeOut()
         ) {
-            AddDebtDialog(floatingActionButtonStateChange = { floatingActionButtonState = it })
+            AddDebtDialog(
+                floatingActionButtonStateChange = { floatingActionButtonState = it },
+                navigateToAddTransactionBottomSheet = { categoryType: CategoryType ->
+                    floatingActionButtonState = false
+
+                    sectionsNavigator?.navigate(AddTransactionBottomSheetDestination(categoryType))
+                }
+            )
         }
 
         AddTransactionButton(
@@ -184,7 +229,13 @@ private fun SectionsScreen(
                 label = "rotate_animation"
             ),
             floatingActionButtonState = floatingActionButtonState,
-            onClick = { floatingActionButtonState = !floatingActionButtonState }
+            onClick = {
+                if (selectedBottomNavigationItem == BottomNavigationItem.Goals) {
+                    sectionsNavigator?.launchSingleTopNavigate(AddGoalsBottomSheetDestination)
+                } else {
+                    floatingActionButtonState = !floatingActionButtonState
+                }
+            }
         )
     }
 }
@@ -195,7 +246,7 @@ private fun RowScope.NavigationBarItem(
     @DrawableRes inactiveIconResId: Int,
     isSelected: Boolean,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val iconId = remember(isSelected) { if (isSelected) activeIconResId else inactiveIconResId }
 
@@ -219,7 +270,7 @@ private fun AddTransactionButton(
     isOpenTransition: Transition<Boolean>,
     floatingActionButtonState: Boolean,
     modifier: Modifier = Modifier,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     val degrees by isOpenTransition.animateFloat(label = "Degrees") { targetIsOpen ->
         when (targetIsOpen) {

@@ -32,36 +32,49 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.xakaton.wallet.R
+import com.xakaton.wallet.domain.models.CategoryType
+import com.xakaton.wallet.domain.models.IncomeType
 import com.xakaton.wallet.domain.models.SpendingType
-import com.xakaton.wallet.ui.destinations.sections.CategoryType
+import com.xakaton.wallet.domain.models.Transaction
+import com.xakaton.wallet.ui.destinations.calendar.DateSelection
 import com.xakaton.wallet.ui.utils.currencyFormatter
 import com.xakaton.wallet.ui.utils.indicationClickable
 import java.math.BigDecimal
+import java.time.LocalDate
 
 @Composable
 fun SpendingContent(
     modifier: Modifier = Modifier,
-    transactions: List<BigDecimal>?,
+    transactions: List<Transaction>?,
     limit: BigDecimal?,
+    navigateToCalendarScreen: (DateSelection) -> Unit,
+    startDate: LocalDate,
+    endDate: LocalDate,
 ) {
-    val transactionsStub = listOf<Pair<SpendingType, BigDecimal>>(
-        SpendingType.HOME to BigDecimal(4000),
-        SpendingType.ANIMALS to BigDecimal(1000),
-        SpendingType.ENTERTAINMENT to BigDecimal(7600)
-    )
+    val sum = remember(transactions) { transactions?.sumOf { it.amount } }
 
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
     ) {
-        item { HeaderInfo(categoryType = CategoryType.SPENDING) }
+        item {
+            HeaderInfo(
+                categoryType = CategoryType.SPENDING,
+                navigateToCalendarScreen = navigateToCalendarScreen,
+                startDate = startDate,
+                endDate = endDate,
+                sum = sum,
+                transactions = transactions ?: listOf(),
+                colors = SpendingType.entries.associate { it.name to it.color }
+            )
+        }
 
         item { Spacer(modifier = Modifier.height(4.dp)) }
 
         when {
-            // transactions == null ->  item { {} }
+            transactions == null -> item { }
 
-            transactions?.isEmpty() == false -> {
+            transactions.isEmpty() -> {
                 item {
                     Spacer(modifier = Modifier.height(48.dp))
 
@@ -78,11 +91,12 @@ fun SpendingContent(
                     }
                 }
 
-                itemsIndexed(transactionsStub) { index, transaction ->
+                itemsIndexed(transactions) { index, transaction ->
                     Transaction(
                         transaction = transaction,
                         index = index,
-                        lastIndex = transactionsStub.lastIndex
+                        lastIndex = transactions.lastIndex,
+                        transactions = transactions
                     )
                 }
             }
@@ -93,12 +107,15 @@ fun SpendingContent(
 @Composable
 private fun Transaction(
     modifier: Modifier = Modifier,
-    transaction: Pair<SpendingType, BigDecimal>,
+    transaction: Transaction,
     index: Int,
     lastIndex: Int,
+    transactions: List<Transaction>?
 ) {
-    val (topShape, topPadding) = remember(index) { if (index == 0) 32.dp to 12.dp else 0.dp to 0.dp }
-    val (bottomShape, bottomPadding) = remember(index) { if (index == lastIndex) 32.dp to 12.dp else 0.dp to 0.dp }
+    val spendingType = remember(transaction) { SpendingType.valueOf(transaction.type) }
+
+    val (topShape, topPadding) = remember(index, transactions) { if (index == 0) 32.dp to 12.dp else 0.dp to 0.dp }
+    val (bottomShape, bottomPadding) = remember(index, transactions) { if (index == lastIndex) 32.dp to 12.dp else 0.dp to 0.dp }
 
     Box(
         modifier = modifier
@@ -127,11 +144,11 @@ private fun Transaction(
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape)
-                    .background(transaction.first.color),
+                    .background(spendingType.color),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    painter = painterResource(id = transaction.first.iconId),
+                    painter = painterResource(id = spendingType.iconId),
                     contentDescription = null,
                     tint = Color.White
                 )
@@ -140,7 +157,7 @@ private fun Transaction(
             Spacer(modifier = Modifier.width(14.dp))
 
             Text(
-                text = stringResource(id = transaction.first.textId),
+                text = stringResource(id = spendingType.textId),
                 color = Color(0xFF262626),
                 fontSize = 16.sp,
                 lineHeight = 24.sp,
@@ -153,7 +170,7 @@ private fun Transaction(
             Spacer(modifier = Modifier.width(14.dp))
 
             Text(
-                text = transaction.second.currencyFormatter(),
+                text = transaction.amount.currencyFormatter(),
                 color = Color(0xFF262626),
                 fontSize = 18.sp,
                 lineHeight = 26.sp,

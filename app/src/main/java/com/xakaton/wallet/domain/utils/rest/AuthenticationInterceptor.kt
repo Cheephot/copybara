@@ -16,7 +16,7 @@ class AuthenticationInterceptor @Inject constructor(
         return runBlocking {
             val originalRequest = chain.request()
 
-            if (originalRequest.url.encodedPath == "/api/users/auth/access_token/") {
+            if (originalRequest.url.encodedPath == "/api/v1/auth/refresh/") {
                 return@runBlocking chain.proceed(originalRequest)
             }
 
@@ -24,7 +24,7 @@ class AuthenticationInterceptor @Inject constructor(
 
             val newRequest = accessToken?.let {
                 originalRequest.newBuilder()
-                    .addHeader("Authorization", it)
+                    .addHeader("Authorization", "Bearer $it")
                     .build()
             } ?: originalRequest
 
